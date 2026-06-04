@@ -28,4 +28,4 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@v16
 
       - name: Build ${{ matrix.pkg }}
-        run: nix build .#${{ matrix.pkg }}
+        run: nix build .#${{ matrix.pkg }} -L

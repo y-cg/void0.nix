@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: ${{ matrix.pkg }} @ ${{ matrix.system.nix }}
+    runs-on: ${{ matrix.system.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg:
+          - vitejs
+          - oxlint
+          - oxfmt
+          - rolldown
+          - default
+        system:
+          - { nix: x86_64-linux, runner: ubuntu-latest }
+          - { nix: aarch64-linux, runner: ubuntu-24.04-arm }
+          - { nix: aarch64-darwin, runner: macos-latest }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Build ${{ matrix.pkg }}
+        run: nix build .#${{ matrix.pkg }}

@@ -19,7 +19,7 @@ stdenv.mkDerivation (finalAttrs: {
     owner = "rolldown";
     repo = "rolldown";
     tag = "v${finalAttrs.version}";
-    hash = lib.fakeHash;
+    hash = "sha256-EbxZe2JBj69F6bpPn4X7BTRE/dTb/mUIvvqw7oqhAe8=";
   };
 
   cargoDeps = rustPlatform.fetchCargoVendor {

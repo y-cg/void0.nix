@@ -16,7 +16,7 @@ stdenv.mkDerivation (finalAttrs: {
     owner = "vitejs";
     repo = "vite";
     rev = "v${finalAttrs.version}";
-    hash = lib.fakeHash;
+    hash = "sha256-seQ3MYiVMypWC0+Om87XSP4qI1s6Agazq//mQJbf0jA=";
   };
 
   pnpmWorkspaces = [ "vite" ];

@@ -23,7 +23,7 @@ stdenv.mkDerivation (finalAttrs: {
     owner = "oxc-project";
     repo = "oxc";
     tag = "oxlint_v${finalAttrs.version}";
-    hash = lib.fakeHash;
+    hash = "sha256-/AXBMb+EEpA10omlpxG1jkCqMrhbB8AdEewyQrMJqTk=";
   };
 
   cargoDeps = rustPlatform.fetchCargoVendor {

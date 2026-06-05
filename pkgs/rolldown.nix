@@ -66,10 +66,14 @@ stdenv.mkDerivation (finalAttrs: {
     done
     cp packages/rolldown/*.node "$outPath/" 2>/dev/null || true
     cp packages/rolldown/dist/*.node "$outPath/dist/" 2>/dev/null || true
+    cp packages/rolldown/dist/*.mjs "$outPath/dist/" 2>/dev/null || true
 
     mkdir -p "$nodeModules/@rolldown/pluginutils"
     cp packages/pluginutils/package.json "$nodeModules/@rolldown/pluginutils/"
     [[ -d packages/pluginutils/dist ]] && cp -r packages/pluginutils/dist "$nodeModules/@rolldown/pluginutils/"
+
+    mkdir -p "$out/bin"
+    ln -s "$out/lib/node_modules/rolldown/bin/cli.mjs" "$out/bin/rolldown"
 
     runHook postInstall
   '';

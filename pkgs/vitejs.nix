@@ -20,10 +20,20 @@ stdenv.mkDerivation (finalAttrs: {
   };
 
   pnpmWorkspaces = [ "vite" ];
+  # Pin the fetcher's pnpm to match the lockfile (v9.0 → pnpm 10). Without
+  # this, fetchPnpmDeps auto-selects the newest pnpm (11.x), which on macOS
+  # leaks file descriptors and gets SIGKILLed during the post-install state
+  # flush (see warnings about "File descriptor X opened in unmanaged mode").
   pnpmDeps = fetchPnpmDeps {
-    inherit (finalAttrs) pname version src pnpmWorkspaces;
+    inherit (finalAttrs)
+      pname
+      version
+      src
+      pnpmWorkspaces
+      ;
+    pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-GjtaDM4B8DhGizjUTCRnZe1idzM4iRQ32e+AK/RsAWI=";
+    hash = "sha256-nRYIPp5cm+RnkGgvOC7L6B0eLFdXw/w5sE16Vuu6OfE=";
   };
 
   nativeBuildInputs = [

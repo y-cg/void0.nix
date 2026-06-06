@@ -27,5 +27,15 @@ jobs:
 
       - uses: DeterminateSystems/nix-installer-action@v16
 
+      - name: Setup Attic
+        run: |
+          nix profile install 'nixpkgs#attic-client'
+          attic login central ${{ secrets.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
+          attic use central:${{ secrets.ATTIC_CACHE }}
+
       - name: Build ${{ matrix.pkg }}
         run: nix build .#${{ matrix.pkg }} -L
+
+      - name: Cache ${{ matrix.pkg }}
+        run: |
+          attic push central:${{ secrets.ATTIC_CACHE }} ./result;

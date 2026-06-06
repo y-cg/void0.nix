@@ -37,11 +37,11 @@ stdenv.mkDerivation {
     hash =
       {
         "linux-x64-gnu" = "sha256-jKEIjFDqjjnYd3DJveQ1McJ0rAGMPoOWgEP9p7Sm9yg=";
-        "linux-arm64-gnu" = "sha256-rjVyfgULhwFXzjaPqDiHForQoI8Y8_WGElwrrXNXvfI=";
-        "linux-x64-musl" = "sha256-_o4uKI0ffmQMVBab_0CCmpt-EQj1SsBG9jApuCJhNT8=";
-        "linux-arm64-musl" = "sha256-_LM9_jzITk6pZVq9pEFHQztkvk14ajvCRisbdC_BkaU=";
-        "darwin-x64" = "sha256-wWHssU_vxrgd9erdu1LSslGhDkPKCoz_nZ2I3NOisnM=";
-        "darwin-arm64" = "sha256-pnF8lM8plk0OXg5Ztq7XT1iJ53Md0Ao093bBbTdZ1wQ=";
+        "linux-arm64-gnu" = "sha256-rjVyfgULhwFXzjaPqDiHForQoI8Y8/WGElwrrXNXvfI=";
+        "linux-x64-musl" = "sha256-/o4uKI0ffmQMVBab/0CCmpt+EQj1SsBG9jApuCJhNT8=";
+        "linux-arm64-musl" = "sha256-/LM9/jzITk6pZVq9pEFHQztkvk14ajvCRisbdC/BkaU=";
+        "darwin-x64" = "sha256-wWHssU/vxrgd9erdu1LSslGhDkPKCoz/nZ2I3NOisnM=";
+        "darwin-arm64" = "sha256-pnF8lM8plk0OXg5Zzq7XT1iJ53Md0Ao093bBbTdZ1wQ=";
       }
       .${platformSuffix}
         or (throw "No prebuilt binary for platform suffix: ${platformSuffix}");

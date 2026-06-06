@@ -41,6 +41,27 @@ nix-update --flake vitejs    # update vitejs derivation
 nix-update --flake viteplus  # bump vp from npm + refresh platform tarball hashes
 ```
 
+`viteplus` ships only the Rust `vp` binary. Global commands (`vp create`, `vp migrate`, …) load JS from `vite-plus/dist/bin.js`. The wrapper defaults to:
+
+```bash
+$VP_HOME/current/node_modules/vite-plus/dist   # VP_HOME defaults to ~/.vite-plus
+```
+
+Override explicitly:
+
+```bash
+export VITE_GLOBAL_CLI_JS_SCRIPTS_DIR=/path/to/vite-plus/dist
+```
+
+Bootstrap the JS side once (official installer or manual):
+
+```bash
+curl -fsSL https://vite.plus | bash
+# or: mkdir -p ~/.vite-plus/$VERSION && cd ~/.vite-plus/$VERSION && npm init -y && npm install vite-plus@$VERSION
+```
+
+Inside a project that already has `vite-plus` in `node_modules`, `vp` uses the local install and does not need the global JS tree.
+
 ### Lint / format
 
 There are no repo-local ESLint or Prettier configs. Validation is **Nix builds** (same as `.github/workflows/ci.yml`). To exercise the packaged tools on sample JS, add files under `/tmp` and run `./result/bin/oxlint`, `./result/bin/oxfmt`, etc.

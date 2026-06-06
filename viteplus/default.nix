@@ -2,9 +2,6 @@
   lib,
   stdenv,
   fetchurl,
-  fetchNpmDeps,
-  nodejs,
-  npmHooks,
   autoPatchelfHook,
   installShellFiles,
   makeWrapper,
@@ -31,7 +28,12 @@ let
     .${stdenv.hostPlatform.system}
       or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
 
-  cliSrc = fetchurl {
+in
+stdenv.mkDerivation {
+  pname = "viteplus";
+  inherit version;
+
+  src = fetchurl {
     url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-${platformSuffix}/-/vite-plus-cli-${platformSuffix}-${version}.tgz";
     hash =
       {
@@ -48,24 +50,9 @@ let
         or (throw "No prebuilt binary for platform suffix: ${platformSuffix}");
   };
 
-  npmDepsSrc = ./npm;
-
-  npmDeps = fetchNpmDeps {
-    src = npmDepsSrc;
-    # update-script: npm-deps-hash
-    hash = "sha256-kRU3mjJDkpdhyg+MXUqTB33TLd7fzg8ETgW6hr27oME=";
-  };
-
-in
-stdenv.mkDerivation {
-  pname = "viteplus";
-  inherit version;
-
-  src = npmDepsSrc;
+  sourceRoot = "package";
 
   nativeBuildInputs = [
-    nodejs
-    npmHooks.npmConfigHook
     installShellFiles
     makeWrapper
     patchelf
@@ -78,22 +65,20 @@ stdenv.mkDerivation {
     stdenv.cc.cc.lib
   ];
 
-  inherit npmDeps;
-
-  dontNpmBuild = true;
-
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/node_modules $out/bin
-    cp -r node_modules/. $out/node_modules/
-
-    tar xzf ${cliSrc} package/vp
     ${lib.optionalString stdenv.hostPlatform.isLinux ''
-      patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" package/vp
+      patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" vp
     ''}
-    install -Dm755 package/vp $out/bin/.vp-unwrapped
-    makeWrapper $out/bin/.vp-unwrapped $out/bin/vp --prefix PATH : ${lib.makeBinPath [ nodejs ]}
+    install -Dm755 vp $out/bin/.vp-unwrapped
+    makeWrapper $out/bin/.vp-unwrapped $out/bin/vp \
+      --run '
+        if [ -z "''${VITE_GLOBAL_CLI_JS_SCRIPTS_DIR:-}" ]; then
+          __vp_home="''${VP_HOME:-$HOME/.vite-plus}"
+          export VITE_GLOBAL_CLI_JS_SCRIPTS_DIR="$__vp_home/current/node_modules/vite-plus/dist"
+        fi
+      '
 
     runHook postInstall
   '';

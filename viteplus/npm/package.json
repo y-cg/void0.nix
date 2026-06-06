@@ -1,7 +1,0 @@
-{
-  "name": "viteplus-npm-deps",
-  "version": "0.0.0",
-  "dependencies": {
-    "vite-plus": "0.1.24"
-  }
-}

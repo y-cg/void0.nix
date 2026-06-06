@@ -16,6 +16,7 @@ jobs:
           - oxlint
           - oxfmt
           - rolldown
+          - viteplus
           - default
         system:
           - { nix: x86_64-linux, runner: ubuntu-latest }

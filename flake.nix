@@ -20,6 +20,7 @@
         oxlint = final.callPackage ./pkgs/oxlint.nix { };
         oxfmt = final.callPackage ./pkgs/oxfmt.nix { };
         rolldown = final.callPackage ./pkgs/rolldown.nix { };
+        viteplus = final.callPackage ./pkgs/viteplus.nix { };
       };
     in
     {
@@ -40,6 +41,7 @@
             oxlint
             oxfmt
             rolldown
+            viteplus
             ;
 
           # nix profile install .#default
@@ -50,6 +52,7 @@
               oxlint
               oxfmt
               rolldown
+              viteplus
             ];
           };
         }

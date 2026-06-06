@@ -4,7 +4,7 @@
 
 ### What this repo is
 
-`void0.nix` is a **Nix flake** that packages the void0 JavaScript toolchain (vite, oxlint, oxfmt, rolldown). There is no application server, database, or `package.json` in the repo itself. Development means building and validating Nix derivations.
+`void0.nix` is a **Nix flake** that packages the void0 JavaScript toolchain (vite, oxlint, oxfmt, rolldown, viteplus). There is no application server, database, or `package.json` in the repo itself. Development means building and validating Nix derivations.
 
 ### Nix daemon (required in this VM)
 
@@ -27,7 +27,7 @@ cd /workspace
 nix build .#default -L
 ```
 
-Individual packages: `vitejs`, `oxlint`, `oxfmt`, `rolldown`, `default`.
+Individual packages: `vitejs`, `oxlint`, `oxfmt`, `rolldown`, `viteplus`, `default`.
 
 Use built binaries via `./result/bin/` (symlink created by `nix build`).
 

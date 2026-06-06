@@ -36,12 +36,14 @@ stdenv.mkDerivation {
     url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-${platformSuffix}/-/vite-plus-cli-${platformSuffix}-${version}.tgz";
     hash =
       {
+        # update-script: platform-hashes-begin
         "linux-x64-gnu" = "sha256-jKEIjFDqjjnYd3DJveQ1McJ0rAGMPoOWgEP9p7Sm9yg=";
         "linux-arm64-gnu" = "sha256-rjVyfgULhwFXzjaPqDiHForQoI8Y8/WGElwrrXNXvfI=";
         "linux-x64-musl" = "sha256-/o4uKI0ffmQMVBab/0CCmpt+EQj1SsBG9jApuCJhNT8=";
         "linux-arm64-musl" = "sha256-/LM9/jzITk6pZVq9pEFHQztkvk14ajvCRisbdC/BkaU=";
         "darwin-x64" = "sha256-wWHssU/vxrgd9erdu1LSslGhDkPKCoz/nZ2I3NOisnM=";
         "darwin-arm64" = "sha256-pnF8lM8plk0OXg5Zzq7XT1iJ53Md0Ao093bBbTdZ1wQ=";
+        # update-script: platform-hashes-end
       }
       .${platformSuffix}
         or (throw "No prebuilt binary for platform suffix: ${platformSuffix}");
@@ -70,7 +72,6 @@ stdenv.mkDerivation {
   '';
 
   postInstall = ''
-    # Patch the interpreter before generating completions (autoPatchelf runs later).
     ${lib.optionalString stdenv.hostPlatform.isLinux ''
       patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/vp
       export LD_LIBRARY_PATH="${lib.makeLibraryPath [ stdenv.cc.cc.lib ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
@@ -81,6 +82,8 @@ stdenv.mkDerivation {
       --fish <(VP_COMPLETE=fish $out/bin/vp) \
       --zsh <(VP_COMPLETE=zsh $out/bin/vp)
   '';
+
+  passthru.updateScript = ./update-viteplus.sh;
 
   meta = {
     description = "The unified toolchain and entry point for web development";

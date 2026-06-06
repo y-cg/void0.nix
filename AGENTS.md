@@ -37,7 +37,8 @@ Use built binaries via `./result/bin/` (symlink created by `nix build`).
 
 ```bash
 nix develop
-nix-update --flake vitejs   # example: update vitejs derivation
+nix-update --flake vitejs    # update vitejs derivation
+nix-update --flake viteplus  # bump vp from npm + refresh platform tarball hashes
 ```
 
 ### Lint / format

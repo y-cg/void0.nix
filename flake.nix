@@ -20,7 +20,7 @@
         oxlint = final.callPackage ./pkgs/oxlint.nix { };
         oxfmt = final.callPackage ./pkgs/oxfmt.nix { };
         rolldown = final.callPackage ./pkgs/rolldown.nix { };
-        viteplus = final.callPackage ./pkgs/viteplus.nix { };
+        viteplus = final.callPackage ./viteplus { };
       };
     in
     {

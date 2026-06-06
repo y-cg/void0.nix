@@ -48,7 +48,7 @@ let
         or (throw "No prebuilt binary for platform suffix: ${platformSuffix}");
   };
 
-  npmDepsSrc = ./viteplus-npm;
+  npmDepsSrc = ./npm;
 
   npmDeps = fetchNpmDeps {
     src = npmDepsSrc;

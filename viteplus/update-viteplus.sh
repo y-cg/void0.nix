@@ -11,14 +11,14 @@
 #   nix-update --flake viteplus
 #
 # Or run directly:
-#   ./pkgs/update-viteplus.sh
-#   VERSION=0.1.25 ./pkgs/update-viteplus.sh
+#   ./viteplus/update-viteplus.sh
+#   VERSION=0.1.25 ./viteplus/update-viteplus.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NIX_FILE="$SCRIPT_DIR/viteplus.nix"
-NPM_DIR="$SCRIPT_DIR/viteplus-npm"
+NIX_FILE="$SCRIPT_DIR/default.nix"
+NPM_DIR="$SCRIPT_DIR/npm"
 
 version="${VERSION:-$(curl -fsSL https://registry.npmjs.org/vite-plus/latest | jq -r .version)}"
 if [[ -z "$version" || "$version" == "null" ]]; then

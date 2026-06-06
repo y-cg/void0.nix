@@ -1,9 +1,10 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i bash -p nix curl jq
+#!nix-shell -i bash -p nix curl jq nodejs prefetch-npm-deps
 # shellcheck shell=bash
 #
-# Bump viteplus to the latest vite-plus release on npm and refresh all
-# @voidzero-dev/vite-plus-cli-* tarball hashes in pkgs/viteplus.nix.
+# Bump viteplus to the latest vite-plus release on npm and refresh:
+# - @voidzero-dev/vite-plus-cli-* platform tarball hashes
+# - vite-plus npm dependency lockfile + npmDepsHash
 #
 # Usage (from repo root):
 #   nix develop
@@ -17,6 +18,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NIX_FILE="$SCRIPT_DIR/viteplus.nix"
+NPM_DIR="$SCRIPT_DIR/viteplus-npm"
 
 version="${VERSION:-$(curl -fsSL https://registry.npmjs.org/vite-plus/latest | jq -r .version)}"
 if [[ -z "$version" || "$version" == "null" ]]; then
@@ -44,10 +46,30 @@ for suffix in "${platforms[@]}"; do
   hash_lines+="        \"$suffix\" = \"$sri\";"$'\n'
 done
 
+cat >"$NPM_DIR/package.json" <<EOF
+{
+  "name": "viteplus-npm-deps",
+  "version": "0.0.0",
+  "dependencies": {
+    "vite-plus": "$version"
+  }
+}
+EOF
+
+echo "  refreshing npm lockfile"
+(
+  cd "$NPM_DIR"
+  export HOME="$TMPDIR"
+  npm install --package-lock-only --ignore-scripts >/dev/null
+)
+
+echo "  prefetching npm deps"
+npm_deps_hash=$(prefetch-npm-deps "$NPM_DIR/package-lock.json")
+
 tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 
-awk -v version="$version" -v hashes="$hash_lines" '
+awk -v version="$version" -v hashes="$hash_lines" -v npm_deps_hash="$npm_deps_hash" '
   /^  version = / {
     print "  version = \"" version "\";"
     next
@@ -63,6 +85,12 @@ awk -v version="$version" -v hashes="$hash_lines" '
     skip = 0
     next
   }
+  /# update-script: npm-deps-hash/ {
+    print
+    getline
+    print "    hash = \"" npm_deps_hash "\";"
+    next
+  }
   !skip { print }
 ' "$NIX_FILE" >"$tmp"
 
@@ -70,3 +98,5 @@ mv "$tmp" "$NIX_FILE"
 trap - EXIT
 
 echo "Updated $NIX_FILE"
+echo "Updated $NPM_DIR/package.json and package-lock.json"
+echo "npmDepsHash = $npm_deps_hash"

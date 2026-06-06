@@ -2,8 +2,12 @@
   lib,
   stdenv,
   fetchurl,
+  fetchNpmDeps,
+  nodejs,
+  npmHooks,
   autoPatchelfHook,
   installShellFiles,
+  makeWrapper,
   patchelf,
 }:
 let
@@ -27,12 +31,7 @@ let
     .${stdenv.hostPlatform.system}
       or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
 
-in
-stdenv.mkDerivation {
-  pname = "viteplus";
-  inherit version;
-
-  src = fetchurl {
+  cliSrc = fetchurl {
     url = "https://registry.npmjs.org/@voidzero-dev/vite-plus-cli-${platformSuffix}/-/vite-plus-cli-${platformSuffix}-${version}.tgz";
     hash =
       {
@@ -49,10 +48,26 @@ stdenv.mkDerivation {
         or (throw "No prebuilt binary for platform suffix: ${platformSuffix}");
   };
 
-  sourceRoot = "package";
+  npmDepsSrc = ./viteplus-npm;
+
+  npmDeps = fetchNpmDeps {
+    src = npmDepsSrc;
+    # update-script: npm-deps-hash
+    hash = "sha256-kRU3mjJDkpdhyg+MXUqTB33TLd7fzg8ETgW6hr27oME=";
+  };
+
+in
+stdenv.mkDerivation {
+  pname = "viteplus";
+  inherit version;
+
+  src = npmDepsSrc;
 
   nativeBuildInputs = [
+    nodejs
+    npmHooks.npmConfigHook
     installShellFiles
+    makeWrapper
     patchelf
   ]
   ++ lib.optionals stdenv.hostPlatform.isLinux [
@@ -63,17 +78,28 @@ stdenv.mkDerivation {
     stdenv.cc.cc.lib
   ];
 
+  inherit npmDeps;
+
+  dontNpmBuild = true;
+
   installPhase = ''
     runHook preInstall
 
-    install -Dm755 vp $out/bin/vp
+    mkdir -p $out/node_modules $out/bin
+    cp -r node_modules/. $out/node_modules/
+
+    tar xzf ${cliSrc} package/vp
+    ${lib.optionalString stdenv.hostPlatform.isLinux ''
+      patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" package/vp
+    ''}
+    install -Dm755 package/vp $out/bin/.vp-unwrapped
+    makeWrapper $out/bin/.vp-unwrapped $out/bin/vp --prefix PATH : ${lib.makeBinPath [ nodejs ]}
 
     runHook postInstall
   '';
 
   postInstall = ''
     ${lib.optionalString stdenv.hostPlatform.isLinux ''
-      patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/bin/vp
       export LD_LIBRARY_PATH="${lib.makeLibraryPath [ stdenv.cc.cc.lib ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     ''}
 

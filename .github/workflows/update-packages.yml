@@ -1,0 +1,68 @@
+name: Update packages
+
+on:
+  schedule:
+    # Daily at 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version preference passed to nix-update
+        type: choice
+        options:
+          - stable
+          - unstable
+        default: stable
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-package:
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - vitejs
+          - oxlint
+          - oxfmt
+          - rolldown
+        version:
+          - ${{ github.event.inputs.version || 'stable' }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: update-package-${{ matrix.package }}-${{ matrix.version }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Install nix-update
+        run: nix profile install nixpkgs#nix-update
+
+      - name: Update ${{ matrix.package }}
+        id: update
+        continue-on-error: true
+        run: nix-update --flake "${{ matrix.package }}" --version="${{ matrix.version }}"
+
+      - name: Create pull request
+        if: steps.update.outcome == 'success'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: update/${{ matrix.package }}${{ matrix.version == 'unstable' && '-unstable' || '' }}
+          delete-branch: true
+          title: "chore(${{ matrix.package }}): update package${{ matrix.version == 'unstable' && ' (unstable)' || '' }}"
+          commit-message: "chore(${{ matrix.package }}): update package${{ matrix.version == 'unstable' && ' (unstable)' || '' }}"
+          body: |
+            Automated update of `${{ matrix.package }}` by [nix-update](https://github.com/Mic92/nix-update).
+
+            Version preference: `${{ matrix.version }}`
+
+            Triggered by the [Update packages](https://github.com/${{ github.repository }}/actions/workflows/update-packages.yml) workflow.
+          labels: |
+            automated
+            dependencies

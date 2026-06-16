@@ -10,28 +10,29 @@
   cargo,
   rustc,
   cmake,
+  makeBinaryWrapper,
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "rolldown";
-  version = "1.0.0";
+  version = "1.1.1";
 
   src = fetchFromGitHub {
     owner = "rolldown";
     repo = "rolldown";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-EbxZe2JBj69F6bpPn4X7BTRE/dTb/mUIvvqw7oqhAe8=";
+    hash = "sha256-6UijakWelvABxLMxcfd6OEaUeijqPTXP4HguARJAXGo=";
   };
 
   cargoDeps = rustPlatform.fetchCargoVendor {
     inherit (finalAttrs) pname version src;
-    hash = "sha256-VDDbS45Lefs/4x0fU1rULgBtjzZJgL1t2lYwENPknEE=";
+    hash = "sha256-Tm6Mt1HC8UmOoGhxFZhxE/IcrD3UVN37RPu2Mn6/SZc=";
   };
 
   pnpmDeps = fetchPnpmDeps {
     inherit (finalAttrs) pname version src;
     pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-pq94ZI0WW9XJFzecdiM/PaOUp7DSSOWWjRO91rd8Xs4=";
+    hash = "sha256-wLgdvR+WxcFXQoOi0cntXnMUXfpOPmjJv6rYWUGJsXA=";
   };
 
   dontUseCmakeConfigure = true;
@@ -44,36 +45,32 @@ stdenv.mkDerivation (finalAttrs: {
     cargo
     rustc
     cmake
+    makeBinaryWrapper
   ];
 
   buildPhase = ''
     runHook preBuild
-    pnpm run --filter "@rolldown/pluginutils" build
     pnpm run --filter rolldown build-native:release
     runHook postBuild
   '';
 
   installPhase = ''
     runHook preInstall
-    local -r nodeModules="$out/lib/node_modules"
-    mkdir -p "$nodeModules"
+    local -r pkgRoot="$out/lib/rolldown"
+    mkdir -p "$pkgRoot/bin"
 
-    local -r outPath="$nodeModules/rolldown"
-    mkdir -p "$outPath"
-    cp packages/rolldown/package.json "$outPath/"
-    for d in bin cli dist; do
-      [[ -d packages/rolldown/$d ]] && cp -r "packages/rolldown/$d" "$outPath/"
-    done
-    cp packages/rolldown/*.node "$outPath/" 2>/dev/null || true
-    cp packages/rolldown/dist/*.node "$outPath/dist/" 2>/dev/null || true
-    cp packages/rolldown/dist/*.mjs "$outPath/dist/" 2>/dev/null || true
+    cp packages/rolldown/package.json "$pkgRoot/"
+    cp -r packages/rolldown/bin/. "$pkgRoot/bin/"
+    cp -r packages/rolldown/dist "$pkgRoot/"
+    cp packages/rolldown/*.node "$pkgRoot/" 2>/dev/null || true
 
-    mkdir -p "$nodeModules/@rolldown/pluginutils"
-    cp packages/pluginutils/package.json "$nodeModules/@rolldown/pluginutils/"
-    [[ -d packages/pluginutils/dist ]] && cp -r packages/pluginutils/dist "$nodeModules/@rolldown/pluginutils/"
+    # runtime dep of dist/*.mjs (marked external by upstream build, same as npm install)
+    mkdir -p "$pkgRoot/node_modules/@rolldown"
+    cp -rL packages/rolldown/node_modules/@rolldown/pluginutils "$pkgRoot/node_modules/@rolldown/"
 
     mkdir -p "$out/bin"
-    ln -s "$out/lib/node_modules/rolldown/bin/cli.mjs" "$out/bin/rolldown"
+    makeBinaryWrapper "${lib.getExe nodejs_22}" "$out/bin/rolldown" \
+      --add-flags "$pkgRoot/bin/cli.mjs"
 
     runHook postInstall
   '';
@@ -83,6 +80,7 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://rolldown.rs";
     changelog = "https://github.com/rolldown/rolldown/blob/v${finalAttrs.version}/CHANGELOG.md";
     license = lib.licenses.mit;
+    mainProgram = "rolldown";
     inherit (nodejs_22.meta) platforms;
   };
 })

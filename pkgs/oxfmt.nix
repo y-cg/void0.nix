@@ -15,25 +15,25 @@
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "oxfmt";
-  version = "0.54.0";
+  version = "0.55.0";
 
   src = fetchFromGitHub {
     owner = "oxc-project";
     repo = "oxc";
     tag = "oxfmt_v${finalAttrs.version}";
-    hash = "sha256-jbPKyQ1A7jrHWRaG2a2fIqOhTrzBI3e6fQD/b9wRUQM=";
+    hash = "sha256-+eP+Pawp2ZE5SqgOy9mReGn0CmXB0Ynm9aupbKLRjhk=";
   };
 
   cargoDeps = rustPlatform.fetchCargoVendor {
     inherit (finalAttrs) pname version src;
-    hash = "sha256-VgrHzUfRPARd90kcCGHzhxPDOJzKsh7nvyg6TxbV9RU=";
+    hash = "sha256-kdV7K1YkaiEKfTNpGUgRGAOAIzdgrupsG4Kg6ZBasrU=";
   };
 
   pnpmDeps = fetchPnpmDeps {
     inherit (finalAttrs) pname version src;
     pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-UTJMkkdIhBZSbGyjBLACfwWI6jKNsdK5zk322EgvJf8=";
+    hash = "sha256-njuEuAvM1DE24ueA4ZlyE/SpwdaKTWgXCV341miVoDI=";
   };
 
   dontUseCmakeConfigure = true;

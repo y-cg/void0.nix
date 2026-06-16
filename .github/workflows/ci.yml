@@ -12,10 +12,6 @@ jobs:
       fail-fast: false
       matrix:
         pkg:
-          - vitejs
-          - oxlint
-          - oxfmt
-          - rolldown
           - default
         system:
           - { nix: x86_64-linux, runner: ubuntu-latest }

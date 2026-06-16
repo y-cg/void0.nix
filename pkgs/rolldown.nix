@@ -68,9 +68,18 @@ stdenv.mkDerivation (finalAttrs: {
     cp packages/rolldown/dist/*.node "$outPath/dist/" 2>/dev/null || true
     cp packages/rolldown/dist/*.mjs "$outPath/dist/" 2>/dev/null || true
 
+    local pluginutilsSrc=""
+    if [[ -d node_modules/@rolldown/pluginutils ]]; then
+      pluginutilsSrc="node_modules/@rolldown/pluginutils"
+    elif [[ -d packages/pluginutils ]]; then
+      pluginutilsSrc="packages/pluginutils"
+    else
+      echo "Could not find @rolldown/pluginutils in node_modules or packages layout" >&2
+      exit 1
+    fi
     mkdir -p "$nodeModules/@rolldown/pluginutils"
-    cp packages/pluginutils/package.json "$nodeModules/@rolldown/pluginutils/"
-    [[ -d packages/pluginutils/dist ]] && cp -r packages/pluginutils/dist "$nodeModules/@rolldown/pluginutils/"
+    cp "$pluginutilsSrc/package.json" "$nodeModules/@rolldown/pluginutils/"
+    [[ -d "$pluginutilsSrc/dist" ]] && cp -r "$pluginutilsSrc/dist" "$nodeModules/@rolldown/pluginutils/"
 
     mkdir -p "$out/bin"
     ln -s "$out/lib/node_modules/rolldown/bin/cli.mjs" "$out/bin/rolldown"

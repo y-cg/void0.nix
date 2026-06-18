@@ -26,14 +26,28 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@v16
 
       - name: Setup Attic
-        run: |
-          nix profile install 'nixpkgs#attic-client'
-          attic login central ${{ secrets.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
-          attic use central:${{ secrets.ATTIC_CACHE }}
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 5
+          retry_wait_seconds: 30
+          timeout_minutes: 10
+          command: |
+            nix profile install 'nixpkgs#attic-client'
+            attic login central ${{ secrets.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
+            attic use central:${{ secrets.ATTIC_CACHE }}
 
       - name: Build ${{ matrix.pkg }}
-        run: nix build .#${{ matrix.pkg }} -L
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          retry_wait_seconds: 60
+          timeout_minutes: 30
+          command: nix build .#${{ matrix.pkg }} -L
 
       - name: Cache ${{ matrix.pkg }}
-        run: |
-          attic push central:${{ secrets.ATTIC_CACHE }} ./result;
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 5
+          retry_wait_seconds: 30
+          timeout_minutes: 10
+          command: attic push central:${{ secrets.ATTIC_CACHE }} ./result

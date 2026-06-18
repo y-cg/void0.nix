@@ -140,4 +140,11 @@ stdenv.mkDerivation (finalAttrs: {
       "aarch64-linux"
     ];
   };
+
+  # `nix-update` discovers upstream versions from `src.url` / `src.urls`, which
+  # only fetchers like `fetchFromGitHub` expose. Our `src` is a local pnpm
+  # project (./.), so the URL probe has nothing to read. Declare the existing
+  # three-step updater here; `nix-update --flake vp` will invoke it instead of
+  # raising "Could not find a url in the derivations src attribute".
+  passthru.updateScript = [ ./update.sh ];
 })

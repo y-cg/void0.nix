@@ -28,6 +28,13 @@ jobs:
           - oxlint
           - oxfmt
           - rolldown
+          # vp's `src` is a local pnpm project (no fetcher, no URL), so the
+          # default nix-update URL flow raises "Could not find a url in the
+          # derivations src attribute". -u dispatches to pkgs/vp/update.sh,
+          # which handles the three linked steps (version bump, lockfile regen,
+          # pnpmDeps hash refresh). A no-op for packages without
+          # passthru.updateScript.
+          - vp
         version:
           - ${{ github.event.inputs.version || 'stable' }}
     runs-on: ubuntu-latest
@@ -47,7 +54,7 @@ jobs:
       - name: Update ${{ matrix.package }}
         id: update
         continue-on-error: true
-        run: nix-update --flake "${{ matrix.package }}" --version="${{ matrix.version }}"
+        run: nix-update --flake "${{ matrix.package }}" --version="${{ matrix.version }}" --use-update-script
 
       - name: Create pull request
         if: steps.update.outcome == 'success'

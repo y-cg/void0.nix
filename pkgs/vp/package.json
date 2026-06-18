@@ -1,0 +1,16 @@
+{
+  "name": "vp-nix",
+  "version": "0.2.1",
+  "description": "Minimal pnpm project that pins the published vite-plus CLI so Nix can fetch its dependency tree offline.",
+  "private": true,
+  "dependencies": {
+    "vite-plus": "0.2.1"
+  },
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": ["darwin", "linux"],
+      "cpu": ["x64", "arm64"],
+      "libc": ["glibc"]
+    }
+  }
+}

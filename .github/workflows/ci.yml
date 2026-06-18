@@ -42,7 +42,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 60
           timeout_minutes: 30
-          command: nix build .#${{ matrix.pkg }} -L
+          command: nix build .#${{ matrix.pkg }} -L --fallback
 
       - name: Cache ${{ matrix.pkg }}
         uses: nick-fields/retry@v3

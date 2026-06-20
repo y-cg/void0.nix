@@ -36,18 +36,13 @@ jobs:
             attic login central ${{ secrets.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
             attic use central:${{ secrets.ATTIC_CACHE }}
 
-      - name: Build ${{ matrix.pkg }}
-        uses: nick-fields/retry@v3
-        with:
-          max_attempts: 3
-          retry_wait_seconds: 60
-          timeout_minutes: 30
-          command: nix build .#${{ matrix.pkg }} -L --fallback
-
-      - name: Cache ${{ matrix.pkg }}
-        uses: nick-fields/retry@v3
-        with:
-          max_attempts: 5
-          retry_wait_seconds: 30
-          timeout_minutes: 10
-          command: attic push central:${{ secrets.ATTIC_CACHE }} ./result
+      - name: Build & push uncached packages
+        run: |
+          nix profile install 'nixpkgs#nix-fast-build'
+          nix-fast-build \
+            --flake ".#packages.${{ matrix.system.nix }}" \
+            --skip-cached \
+            --no-nom \
+            --no-link \
+            --retries 3 \
+            --attic-cache "central:${{ secrets.ATTIC_CACHE }}"

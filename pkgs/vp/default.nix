@@ -57,7 +57,7 @@
 # autoPatchelf skips the foreign-arch addons it cannot patch).
 stdenv.mkDerivation (finalAttrs: {
   pname = "vp";
-  version = "0.2.1";
+  version = "0.2.6";
 
   # `src` is a tiny pnpm project (./package.json + ./pnpm-lock.yaml + ./.npmrc)
   # that pins `vite-plus@<version>`. pnpm fetches the CLI and its entire
@@ -71,7 +71,7 @@ stdenv.mkDerivation (finalAttrs: {
     fetcherVersion = 3;
     # One hash for every platform: `supportedArchitectures` in ./package.json
     # fixes the fetched optional-addon set, so this is host-independent.
-    hash = "sha256-i7LS4AkUhpo0aRsvAv76IyxBW0KyBll1a+DSHCEGogc=";
+    hash = "sha256-U/rC1uDkaXUyhMt6JQwavhY7tUm1oZJCNBcUe7pRxTQ=";
   };
 
   nativeBuildInputs = [

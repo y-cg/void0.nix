@@ -14,25 +14,25 @@
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "rolldown";
-  version = "1.1.2";
+  version = "1.2.13";
 
   src = fetchFromGitHub {
     owner = "rolldown";
     repo = "rolldown";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-1bA1K4LXeT91IplS8yjDPSWMU7zqA8Bs7qtxuQMxxPQ=";
+    hash = "sha256-VB0/xaYOljpaIovBUhcqdAdnulVZjGwvFaFQsOQMB2g=";
   };
 
   cargoDeps = rustPlatform.fetchCargoVendor {
     inherit (finalAttrs) pname version src;
-    hash = "sha256-iCdjD1i0DcCM54Byo0rFJQtWcUTIbNQKX12u2083mTU=";
+    hash = "sha256-jaU3TAkwuwXAUEb12H6V2MGgjzIOQXoM03KdEJ438fo=";
   };
 
   pnpmDeps = fetchPnpmDeps {
     inherit (finalAttrs) pname version src;
     pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-lKqPo4vsY9RXpVvXJtQ564Rfs9r2pu4r91+NXSOdLOE=";
+    hash = "sha256-/I/BU4cWzfwWZjzAPJQOBzeokZHUNZNaf4ho1QXVL7Q=";
   };
 
   dontUseCmakeConfigure = true;

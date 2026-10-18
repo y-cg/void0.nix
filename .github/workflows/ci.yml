@@ -36,13 +36,18 @@ jobs:
             attic login central ${{ secrets.ATTIC_ENDPOINT }} ${{ secrets.ATTIC_TOKEN }}
             attic use central:${{ secrets.ATTIC_CACHE }}
 
+      # nix-fast-build 2.0.4 accepts --retries and then drops it, so retry here.
       - name: Build & push uncached packages
-        run: |
-          nix profile install 'nixpkgs#nix-fast-build'
-          nix-fast-build \
-            --flake ".#packages.${{ matrix.system.nix }}" \
-            --skip-cached \
-            --no-nom \
-            --no-link \
-            --retries 3 \
-            --attic-cache "central:${{ secrets.ATTIC_CACHE }}"
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          retry_wait_seconds: 30
+          timeout_minutes: 60
+          command: |
+            nix profile install 'nixpkgs#nix-fast-build'
+            nix-fast-build \
+              --flake ".#packages.${{ matrix.system.nix }}" \
+              --skip-cached \
+              --no-nom \
+              --no-link \
+              --attic-cache "central:${{ secrets.ATTIC_CACHE }}"

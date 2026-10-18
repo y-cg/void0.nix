@@ -57,7 +57,7 @@
 # autoPatchelf skips the foreign-arch addons it cannot patch).
 stdenv.mkDerivation (finalAttrs: {
   pname = "vp";
-  version = "0.2.1";
+  version = "1.3.0";
 
   # `src` is a tiny pnpm project (./package.json + ./pnpm-lock.yaml + ./.npmrc)
   # that pins `vite-plus@<version>`. pnpm fetches the CLI and its entire
@@ -71,7 +71,7 @@ stdenv.mkDerivation (finalAttrs: {
     fetcherVersion = 3;
     # One hash for every platform: `supportedArchitectures` in ./package.json
     # fixes the fetched optional-addon set, so this is host-independent.
-    hash = "sha256-i7LS4AkUhpo0aRsvAv76IyxBW0KyBll1a+DSHCEGogc=";
+    hash = "sha256-o4bM9t0MVu9Yw9jj27/cFnXp4hBjvB1G+M8oFZw/Wts=";
   };
 
   nativeBuildInputs = [
@@ -113,17 +113,20 @@ stdenv.mkDerivation (finalAttrs: {
         'else fs.copyFileSync(src, dest);' \
         'else { fs.copyFileSync(src, dest); fs.chmodSync(dest, fs.statSync(src).mode | 0o200); }'
 
-    # `bin/vp` is `#!/usr/bin/env node` importing `../dist/bin.js`; resolution of
-    # the native addon and tool packages is relative to this file, so it must run
-    # from inside the shipped tree. The wrapper also puts our Node on PATH for any
-    # child processes vp spawns (dev server, test runner, …), and $out/bin so vp's
-    # post-scaffold self-invocation (`spawn('vp', ['install'])`) resolves even when
-    # vp was launched by absolute path rather than from PATH.
+    # `bin/vp` and `bin/vpr` are `#!/usr/bin/env node` importing `../dist/bin.js`
+    # (`vpr` is the argv0 alias for `vp run`). Resolution of the native addon and
+    # tool packages is relative to these files, so they must run from inside the
+    # shipped tree. The wrapper also puts our Node on PATH for any child processes
+    # vp spawns (dev server, test runner, …), and $out/bin so vp's post-scaffold
+    # self-invocation (`spawn('vp', ['install'])`) resolves even when vp was
+    # launched by absolute path rather than from PATH.
     mkdir -p "$out/bin"
-    makeBinaryWrapper "${lib.getExe nodejs_22}" "$out/bin/vp" \
-      --add-flags "$pkgRoot/node_modules/vite-plus/bin/vp" \
-      --prefix PATH : "${lib.makeBinPath [ nodejs_22 ]}" \
-      --prefix PATH : "$out/bin"
+    for bin in vp vpr; do
+      makeBinaryWrapper "${lib.getExe nodejs_22}" "$out/bin/$bin" \
+        --add-flags "$pkgRoot/node_modules/vite-plus/bin/$bin" \
+        --prefix PATH : "${lib.makeBinPath [ nodejs_22 ]}" \
+        --prefix PATH : "$out/bin"
+    done
 
     runHook postInstall
   '';

@@ -54,10 +54,10 @@ fi
 # ------------------------------------------------------------------------------
 # 2. Rewrite the pinned version
 # ------------------------------------------------------------------------------
-# package.json: only the vite-plus dependency pin (jq preserves the rest,
-# including the pnpm.supportedArchitectures block).
+# package.json: the private package version and the vite-plus pin. jq preserves
+# the rest, including the pnpm.supportedArchitectures block.
 tmp="$(mktemp)"
-jq --indent 2 --arg v "$target" '.dependencies["vite-plus"] = $v' "$pkg_json" >"$tmp"
+jq --indent 2 --arg v "$target" '.version = $v | .dependencies["vite-plus"] = $v' "$pkg_json" >"$tmp"
 mv "$tmp" "$pkg_json"
 
 # default.nix: the derivation's own `version = "...";`.

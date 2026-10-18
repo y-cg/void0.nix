@@ -1,10 +1,17 @@
 {
   description = "void0 toolchain overlay";
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # rolldown's rust-toolchain.toml is ahead of nixpkgs rustc. See pkgs/rolldown.nix.
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
   outputs =
-    { self, nixpkgs }:
+    { nixpkgs, rust-overlay, ... }:
     let
       lib = nixpkgs.lib;
       systems = [
@@ -22,17 +29,23 @@
         rolldown = final.callPackage ./pkgs/rolldown.nix { };
         vp = final.callPackage ./pkgs/vp { };
       };
+
+      # rust-overlay must be applied first so rolldown can take rust-bin from pkgs.
+      composedOverlay = lib.composeManyExtensions [
+        rust-overlay.overlays.default
+        overlay
+      ];
     in
     {
-      overlays.default = overlay;
-      overlays.void0 = overlay;
+      overlays.default = composedOverlay;
+      overlays.void0 = composedOverlay;
 
       packages = forAllSystems (
         system:
         let
           pkgs = import nixpkgs {
             inherit system;
-            overlays = [ overlay ];
+            overlays = [ composedOverlay ];
           };
         in
         {

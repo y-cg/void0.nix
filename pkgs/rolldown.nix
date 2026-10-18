@@ -6,12 +6,20 @@
   pnpmConfigHook,
   pnpm_10,
   nodejs_22,
-  rustPlatform,
-  cargo,
-  rustc,
+  makeRustPlatform,
+  rust-bin,
   cmake,
   makeBinaryWrapper,
 }:
+let
+  # v1.2.14 rust-toolchain.toml pins 1.99.0. oxc 0.154 sets rust-version
+  # = 1.97, so nixpkgs rustc 1.95 (this flake's pin) refuses the build.
+  rust = rust-bin.stable."1.99.0".minimal;
+  rustPlatform = makeRustPlatform {
+    cargo = rust;
+    rustc = rust;
+  };
+in
 stdenv.mkDerivation (finalAttrs: {
   pname = "rolldown";
   version = "1.2.14";
@@ -42,8 +50,7 @@ stdenv.mkDerivation (finalAttrs: {
     pnpm_10
     nodejs_22
     rustPlatform.cargoSetupHook
-    cargo
-    rustc
+    rust
     cmake
     makeBinaryWrapper
   ];

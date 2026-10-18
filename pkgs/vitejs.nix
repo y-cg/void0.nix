@@ -10,13 +10,13 @@
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "vitejs";
-  version = "8.0.16";
+  version = "8.2.2";
 
   src = fetchFromGitHub {
     owner = "vitejs";
     repo = "vite";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-seQ3MYiVMypWC0+Om87XSP4qI1s6Agazq//mQJbf0jA=";
+    hash = "sha256-29ZluZSReOPhYGNSIR8SDq6euSrLRC8ctwF80oy28EY=";
   };
 
   pnpmWorkspaces = [ "vite" ];
@@ -33,7 +33,7 @@ stdenv.mkDerivation (finalAttrs: {
       ;
     pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-IJR1clWPjkPNDJ7y8Q21aUESxB8XULDau+QuEx+RGmE=";
+    hash = "sha256-O1GZqsKyKSDq2AoshoNcSkAYLtFg06TBplERBy+JY8g=";
   };
 
   nativeBuildInputs = [

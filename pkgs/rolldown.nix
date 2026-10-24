@@ -1,6 +1,7 @@
 {
   lib,
   stdenv,
+  applyPatches,
   fetchFromGitHub,
   fetchPnpmDeps,
   pnpmConfigHook,
@@ -16,11 +17,16 @@ stdenv.mkDerivation (finalAttrs: {
   pname = "rolldown";
   version = "1.2.15";
 
-  src = fetchFromGitHub {
-    owner = "rolldown";
-    repo = "rolldown";
-    tag = "v${finalAttrs.version}";
-    hash = "sha256-fGPH+Fxumvw2H45VCum/tbEVf8n3bqWlxn7Iob21C3g=";
+  # Pin @napi-rs/cli to 3.7.x. 3.8.0+ calls /bin/ps to read the process start time
+  # The Nix macOS sandbox denies that exec, and the resulting `spawn EPERM`.
+  src = applyPatches {
+    src = fetchFromGitHub {
+      owner = "rolldown";
+      repo = "rolldown";
+      tag = "v${finalAttrs.version}";
+      hash = "sha256-fGPH+Fxumvw2H45VCum/tbEVf8n3bqWlxn7Iob21C3g=";
+    };
+    patches = [ ./rolldown-napi-cli-pin.patch ];
   };
 
   cargoDeps = rustPlatform.fetchCargoVendor {
@@ -32,7 +38,7 @@ stdenv.mkDerivation (finalAttrs: {
     inherit (finalAttrs) pname version src;
     pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-U/1ld51kvwAcBd5UQFvT8qWN1JKqMgcV5iloaxiC7HE=";
+    hash = "sha256-LycplzH8LJk48OiVLO49IqQSgB/VTMWxUU3ibikUN2A=";
   };
 
   dontUseCmakeConfigure = true;
